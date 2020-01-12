@@ -10,6 +10,10 @@ window.bgcolor("#C41E3A")
 window.tracer(0)
 window.title("Plong (Press x to close the game)")
 
+####################
+#On screen objects #
+####################
+
 #Scorekeeper
 sk = turtle.Turtle()
 sk.speed(0)
@@ -106,32 +110,42 @@ window.onkeypress(p1_down, "s")
 window.onkeypress(p2_up, "Up")
 window.onkeypress(p2_down, "Down")
 
-#Main Game loop
-while True:
-	window.update()
+####################
+#Gameplay functions#
+####################
 
-	ball.setx(ball.x_speed + ball.xcor())
-	ball.sety(ball.y_speed + ball.ycor())
+#Reset ball to original position
+def resetball(speed):
+	ball.setx(0)
+	ball.sety(0)
+	ball.x_speed = speed
 
+#Give boost to player who scored
+def goalboost(player):
+	#Increase size of paddle for person who scored
+	player.stretchwid *= 1.2
+	player.shapesize(stretch_wid = p1.stretchwid, stretch_len = 1)
+	player.halfsize *= 1.2
+	#Update score
+	player.points += 1
+
+#Check if ball is going out of bounds vertically
+def checkBallInbounds():
 	ball_x = ball.xcor()
 	ball_y = ball.ycor()
-
-	#Check if ball is going to over height
 	if(ball_y >= height/2 - 20 or ball_y <= -(height/2 - 20)):
 		ball.y_speed *= -1
 
-	#Check is ball is going to goal
+#Check is ball is going to goal
+def checkgoal():
+	ball_x = ball.xcor()
+	ball_y = ball.ycor()
 	#Player 1 scored
 	if(ball_x >= 470):
 		#Reset ball
-		ball.setx(0)
-		ball.sety(0)
-		ball.x_speed = -3
-		#Increase size of paddle for person who scored
-		p1.stretchwid *= 1.2
-		p1.shapesize(stretch_wid = p1.stretchwid, stretch_len = 1)
-		p1.halfsize *= 1.2
-		p1.points += 1
+		resetball(-3)
+		#boost for scoring point
+		goalboost(p1)
 		sk.clear()
 		sk.write("Player 1: {}              Player 2: {}".format(p1.points, p2.points), align = "center", font = ("Coutier", 24, "normal"))
 		os.system("afplay sounds/score.mp3&")
@@ -140,31 +154,30 @@ while True:
 	#Player 2 scored
 	if ball_x < -470:
 		#Reset ball
-		ball.setx(0)
-		ball.sety(0)
-		ball.x_speed = 3
+		resetball(3)
 		#Increase paddle size
-		p2.stretchwid *= 1.2
-		p2.shapesize(stretch_wid = p2.stretchwid, stretch_len = 1)
-		p2.halfsize *= 1.2
-		p2.points += 1
+		goalboost(p2)
 		sk.clear()
 		sk.write("Player 1: {}              Player 2: {}".format(p1.points, p2.points), align = "center", font = ("Coutier", 24, "normal"))
 		os.system("afplay sounds/score.mp3&")
 
+#Check if ball hit paddle
+def hitpaddle():
+	ball_x = ball.xcor()
+	ball_y = ball.ycor()
 
 	#Check if ball hit paddle 1
-	#Add 10 because of the size of the ball (default)
 	if(ball_x < -440 and ball_x > -450 and (ball_y >= p1.ycor() - p1.halfsize and ball_y <= p1.ycor() + p1.halfsize)):
 		#Speed up ball by 1.05 times
 		ball.x_speed *= -1.1
 
 	#Check if ball hit paddle2
-	#Add 10 because of the size of the ball (default)
 	if(ball_x > 440 and ball_x < 450 and (ball_y >= p2.ycor() - p2.halfsize and ball_y <= p2.ycor() + p2.halfsize)):
 		ball.x_speed *= -1.1
 
-	#Check if paddle is going above height
+def paddle_isInbounds():
+	#If paddle's upper or lower end is touching border, make stationary
+	#Overrides onkeypress command
 	if(p1.ycor() + p1.halfsize >= height/2):
 		p1.sety(height/2 - p1.halfsize)
 
@@ -177,14 +190,28 @@ while True:
 	if(p2.ycor() - p2.halfsize <= -height/2):
 		p2.sety(-height/2 + p2.halfsize)
 
-	#End game
+def endgame():
 	if(p1.points == 5 or p2.points == 5):
+		#Stop ball movement
 		ball.x_speed = 0
 		ball.y_speed = 0
+		#Stop registering keys
 		window.onkeypress(None, "e")
 		window.onkeypress(None, "s")
 		window.onkeypress(None, "Up")
 		window.onkeypress(None, "Down")
 		g.write("Victory! Good game folks. Quit the console to exit the game.", align = "center", font = ("Coutier", 24, "normal"))
 
+#Main Game loop
+while True:
+	window.update()
 
+	#Update ball position
+	ball.setx(ball.x_speed + ball.xcor())
+	ball.sety(ball.y_speed + ball.ycor())
+
+	checkBallInbounds()
+	checkgoal()
+	hitpaddle()
+	paddle_isInbounds()
+	endgame()
