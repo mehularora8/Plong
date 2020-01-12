@@ -25,7 +25,7 @@ Use the following command to run the app. Make sure you have python3 installed o
 python3 plong.py
 ```
 
-![Run the app](https://i.imgur.com/AgMYdyf.png)
+![Run the app](https://i.imgur.com/osmdXyG.png)
 
 ### Step 3: Play the game!
 
