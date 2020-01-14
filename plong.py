@@ -123,9 +123,9 @@ def resetball(speed):
 #Give boost to player who scored
 def goalboost(player):
 	#Increase size of paddle for person who scored
-	player.stretchwid *= 1.2
+	player.stretchwid *= 1.3
 	player.shapesize(stretch_wid = p1.stretchwid, stretch_len = 1)
-	player.halfsize *= 1.2
+	player.halfsize *= 1.3
 	#Update score
 	player.points += 1
 
